@@ -3,6 +3,7 @@ from ..teacher.teacherDAO import TeacherModel
 from db_config.database import db
 from common.response import *
 from loguru import logger
+from ..student.studentDAO import StudentEnrolled
 
 
 class Course(CourseModel):
@@ -44,6 +45,26 @@ class Course(CourseModel):
                 ResponseEnum.Failed,message="Error while adding Course!!"
             )
         
+    def view_students(self,courseid):
+            try:
+                studDict =[]
+                records = StudentEnrolled.query.filter_by(courseId=courseid).all()
+                for record in records:
+                    studRecord = {
+                                    'studId': record.studId,
+                                    'courseId': record.courseId,
+                                    'joindate': record.joindate.strftime('%Y-%m-%d') 
+                                }
+                    studDict.append(studRecord)
+                return Response(
+                ResponseEnum.Success,message = "students registered for this course are :",data=studDict
+            )
+            except Exception as e:
+                logger.exception(str(e))
+                raise e
+
+
+
 
     
     

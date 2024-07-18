@@ -1,8 +1,10 @@
 from .studentDAO import StudentModel,StudentEnrolled,FeesPaymentModel
+from .studentDAO import get_last_day_of_current_month
 from db_config.database import db
 from common.response import *
 from loguru import logger
-import datetime as dt
+from datetime import datetime
+from datetime import date 
 from ..user.userDAO import UserModel
 from ..course.courseDAO import CourseModel,course_schema
 from flask_jwt_extended import create_access_token
@@ -14,18 +16,27 @@ from flask_jwt_extended import create_access_token
 class Student(StudentModel):
     def save(self,body):
         try:
+            email = body.get('email')
+            passwd = body.get('passwd')
+            name = body.get('name')
+
+            # student is already present
+            studrecord = StudentModel.query.filter_by(email=email,name=name).first()  
+            if studrecord:
+                return Response(
+                ResponseEnum.Success,message = "Student record is already present...!"
+            )       
             obj = StudentModel(**body)
             db.session.add(obj)
             # db.session.commit()
             # add here code to check student exist already.
-            email = body.get('email')
-            password = body.get('passwd')
-            if email and password:
-                today = dt.date.today()
+           
+            if email and passwd:
+                today = date.today()
                 print(today)
                 user = UserModel(
                     username=email,
-                    password=password,
+                    password=passwd,
                     role='student',
                     createdDate = today
                 )
@@ -65,7 +76,7 @@ class Student(StudentModel):
     def enroll_stud_course(self,loggedStudId,courseid,status):
         try:
            
-            obj = StudentEnrolled(id=loggedStudId,courseId=courseid,feesPaidSatus=status)
+            obj = StudentEnrolled(studId=loggedStudId,courseId=courseid,feesPaidSatus=status)
             print({"id":obj.id,
                    "courseid":obj.courseId,
                    "feesPaidSatus":obj.feesPaidSatus})
@@ -110,13 +121,24 @@ class Student(StudentModel):
         
     def pay_fees(self,body):
         try:
-
+            
+            StudId =body['StudId']
+            courseId= body['courseId']
+            month= body['month']
+            paydate = body['paymentDate'] 
+            # paymentdt = datetime.strptime(paydate, "%Y-%m-%d")
+            # due_date = get_last_day_of_current_month()
+            
+            feesrec = FeesPaymentModel.query.filter_by(StudId=StudId, courseId=courseId, month=month).first()
+            
+            if feesrec:
+                    return Response(
+                ResponseEnum.Success,message ="You have aleady done payment for given month and course"
+            )
             obj = FeesPaymentModel(**body)
             db.session.add(obj)
-
-            return Response(
-                ResponseEnum.Success,message = "successfully enrolled for course!!"
-            )
+            db.session.commit()
+         
 
         except Exception as e:
             logger.exception(f"{str(e)}")

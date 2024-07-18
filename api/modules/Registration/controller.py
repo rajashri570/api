@@ -15,15 +15,13 @@ class PayRegFees(Resource):
             # body = request.json()
             current_stud = get_jwt_identity()
             record = StudentModel.query.filter_by(id=current_stud).first()
-            studName = record.name
-            print(studName)
 
             body = request.get_json()
             amount = body['amount']
             obj = Registor()
-            result = obj.save(studName,amount,current_stud)
+            result = obj.save(current_stud,amount)
             if result.status == ResponseEnum.Success:
-                return {"status":"Success","message":result.message,"token":result.data},201
+                return {"status":"Success","message":result.message,"data":result.data},201
             else:
                  return {"status":"failed","message":"Error while paying fees!"}
         except Exception as e:

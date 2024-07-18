@@ -33,18 +33,19 @@ class LoginStudent(Resource):
                 return {"status":"Failed","message":"Internal server error"},505
         
      
-class EnrollStudCourse(Resource):
+class EnrollStud(Resource):
     @jwt_required() 
     def post(self):
         try:
             print("---------------in reg controller")
-            claims = get_jwt()     
-            paidstatus = claims.get("feesPaidStatus")           
+                    
             loggedStudId = get_jwt_identity()
+            claims = get_jwt()
+            feesPaidStatus = claims['feesPaidStatus']
             data = request.get_json()  # Parse the incoming JSON data
             courseid = data.get('courseid')
             studObj = Student()
-            result = studObj.enroll_for_course(loggedStudId,courseid,paidstatus)
+            result = studObj.enroll_stud_course(loggedStudId,courseid,feesPaidStatus)
             if result.status == ResponseEnum.Success:
                 return {"status":"Success","message":result.message},201
         except Exception as e:
@@ -62,3 +63,17 @@ class ViewCourse(Resource):
                 logger.exception(f"{str(e)}")
                 return {"status":"Failed","message":"Internal server error"},505
             
+class PayFees(Resource):
+    def post(self):
+        try:
+            body = request.get_json()
+            obj = Student()
+            result = obj.pay_fees(body)
+            if result.status == ResponseEnum.Success:
+                return {"status":"Success","message":result.message,"data":result.data},201
+        except Exception as e:
+             logger.exception(f"{str(e)}")
+             return {"status":"Failed","message":"Internal Server Error"},505
+
+
+  

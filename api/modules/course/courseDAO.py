@@ -18,7 +18,7 @@ class CourseModel(db.Model):
     is_valid = db.Column(db.Boolean,default=True)
 
     teacher = db.relationship('TeacherModel', backref=db.backref('course', lazy=True))
-    course = db.relationship('StudentEnrolled', backref=db.backref('course', lazy=True))
+
 
 # class CourseSchema(SQLAlchemyAutoSchema):
 #     class Meta:
