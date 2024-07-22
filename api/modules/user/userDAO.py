@@ -7,3 +7,5 @@ class UserModel(db.Model):
     password = db.Column(db.String,nullable = False)
     role = db.Column(db.String,nullable=False)
     createdDate = db.Column(db.DateTime)
+       
+ 

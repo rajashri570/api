@@ -15,4 +15,5 @@ PyJWT==2.8.0
 marshmallow-sqlalchemy==1.0.0
 marshmallow==3.21.3
 Flask-JWT-Extended==4.6.0
+Flask-Mail==24.1.2
 #$env:PYTHONPATH = "$PWD/modules;$PWD/modules/course"

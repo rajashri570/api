@@ -8,12 +8,11 @@ from datetime import date
 from ..user.userDAO import UserModel
 from ..course.courseDAO import CourseModel,course_schema
 from flask_jwt_extended import create_access_token
-
-
-
-# from flask_bcrypt import Bcrypt 
+from service.email.email import MailServer
+# from flask import current_app as app
 
 class Student(StudentModel):
+    
     def save(self,body):
         try:
             email = body.get('email')
@@ -28,7 +27,7 @@ class Student(StudentModel):
             )       
             obj = StudentModel(**body)
             db.session.add(obj)
-            # db.session.commit()
+            db.session.commit()
             # add here code to check student exist already.
            
             if email and passwd:
@@ -72,10 +71,13 @@ class Student(StudentModel):
             logger.exception(f"{str(e)}")
             raise e
         
-   
     def enroll_stud_course(self,loggedStudId,courseid,status):
         try:
-           
+            record = StudentEnrolled.query.filter_by(studId=loggedStudId,courseId=courseid).first()
+            if record:
+                return Response(
+                ResponseEnum.Success,message = "You have already enrolled for this course!!")
+            
             obj = StudentEnrolled(studId=loggedStudId,courseId=courseid,feesPaidSatus=status)
             print({"id":obj.id,
                    "courseid":obj.courseId,
@@ -83,7 +85,17 @@ class Student(StudentModel):
             db.session.add(obj)
             db.session.commit()
 
-        
+            
+
+            studObj = Student.query.filter_by(id=loggedStudId).first()
+            print("EMail.............",studObj.email)
+
+            courseObj = CourseModel.query.filter_by(id=courseid).first()
+            email = MailServer()
+            
+            # email.send_mail("preetheshks21@gmail.com","/ggoglemeet")
+            email.send_mail(studObj.email,courseObj.social_link)
+
             return Response(
                 ResponseEnum.Success,message = "successfully enrolled for course!!"
             )
@@ -138,8 +150,10 @@ class Student(StudentModel):
             obj = FeesPaymentModel(**body)
             db.session.add(obj)
             db.session.commit()
-         
-
+            return Response(
+                ResponseEnum.Success,message ="paid fees successfully!!!"
+            )
+        
         except Exception as e:
             logger.exception(f"{str(e)}")
             db.session.rollback()

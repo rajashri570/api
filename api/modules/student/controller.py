@@ -37,8 +37,7 @@ class EnrollStud(Resource):
     @jwt_required() 
     def post(self):
         try:
-            print("---------------in reg controller")
-                    
+          
             loggedStudId = get_jwt_identity()
             claims = get_jwt()
             feesPaidStatus = claims['feesPaidStatus']
@@ -70,7 +69,7 @@ class PayFees(Resource):
             obj = Student()
             result = obj.pay_fees(body)
             if result.status == ResponseEnum.Success:
-                return {"status":"Success","message":result.message,"data":result.data},201
+                return {"status":"Success","message":result.message},201
         except Exception as e:
              logger.exception(f"{str(e)}")
              return {"status":"Failed","message":"Internal Server Error"},505

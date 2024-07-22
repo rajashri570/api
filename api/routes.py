@@ -4,6 +4,7 @@ from modules.course import routes as add_course_route
 from modules.student import routes as add_student_route
 from modules.teacher import routes as add_teacher_route
 from modules.Registration import routes as add_registration_route
+from modules.user import routes as add_user_routes
 class Routes(object):
     def __init__(self, app, base_path):
         self.api = Api(app)
@@ -13,3 +14,4 @@ class Routes(object):
         add_student_route(self.api, self.base_path)
         add_teacher_route(self.api,self.base_path)
         add_registration_route(self.api,self.base_path)
+        add_user_routes(self.api,self.base_path)
